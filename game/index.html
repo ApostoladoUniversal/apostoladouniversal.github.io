@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script src="js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <style>
+        #puzzle {
+            display: grid;
+            /* Usar grid para organizar as peças do quebra-cabeça */
+            grid-template-columns: repeat(4, 1fr);
+            /* 4 colunas */
+            grid-template-rows: repeat(4, 1fr);
+            /* 4 linhas */
+            width: 400px;
+            /* Largura total do quebra-cabeça */
+            height: 400px;
+            /* Altura total do quebra-cabeça */
+            overflow: hidden;
+            /* Ocultar partes que saem do contêiner */
+            position: relative;
+            /* Para posicionamento relativo das peças */
+        }
+
+        .piece {
+            width: 100px;
+            /* Tamanho das peças */
+            height: 100px;
+            /* Tamanho das peças */
+            background-image: url('images/cc_NT-161_01.jpg');
+            /* Imagem de fundo */
+            background-size: 400px 400px;
+            /* Ajuste para o tamanho correto da imagem */
+            border: 1px solid #ccc;
+            /* Borda das peças */
+            box-sizing: border-box;
+            /* Incluir borda e padding no tamanho total */
+            cursor: pointer;
+            /* Cursor de ponteiro ao passar sobre as peças */
+            position: relative;
+            /* Para posicionamento relativo */
+        }
+
+        #reference {
+            width: 400px;
+            /* Largura da imagem de referência */
+            height: 400px;
+            /* Altura da imagem de referência */
+            background-image: url('images/cc_NT-161_01.jpg');
+            /* Imagem de fundo da referência */
+            background-size: cover;
+            /* Cobrir todo o espaço disponível */
+            border: 1px solid #ccc;
+            /* Borda da imagem de referência */
+        }
+
+        .selected {
+            border: 2px solid red;
+        }
+    </style>
+</head>
+
+<body>
+    <BR>
+    <div class="container">
+        <div class="row">
+            <div class="col-2" style="min-width: 100px;">
+                <select class="form-control" id="language" onchange="changeLanguage()">
+                    <li>
+                        <option value="pt">🇵🇹 🇧🇷</option>
+                    </li>
+                    <li>
+                        <option value="en">🇺🇸 🇬🇧</option>
+                    </li>
+                    <li>
+                        <option value="zh">🇨🇳</option>
+                    </li>
+                    <li>
+                        <option value="ru">🇷🇺</option>
+                    </li>
+                    <li>
+                        <option value="es">🇪🇸</option>
+                    </li>
+                    <li>
+                        <option value="de">🇩🇪</option>
+                    </li>
+                    <li>
+                        <option value="fr">🇫🇷</option>
+                    </li>
+                    <li>
+                        <option value="it">🇮🇹</option>
+                    </li>
+                    <li>
+                        <option value="jp">🇯🇵</option>
+                    </li>
+                    <li>
+                        <option value="hi">🇮🇳</option>
+                    </li>
+                    <li>
+                        <option value="ar">🇸🇦</option>
+                    </li>
+                    <li>
+                        <option value="la">🇻🇦</option>
+                    </li>
+                </select>
+            </div>
+            <div class="col-10">
+                <div id="instructions"
+                    data-pt="Clique e arraste as peças para movê-las ou clique em uma peça e depois clique em outra para movê-las."
+                    data-en="Click and drag the pieces to move them or click on one piece and then click on another to move them."
+                    data-zh="点击并拖动棋子以移动它们，或先点击一个棋子，然后再点击另一个来移动它们。"
+                    data-ru="Щелкните и перетяните фишки, чтобы переместить их, или щелкните по одной фишке, а затем по другой, чтобы переместить их."
+                    data-es="Haz clic y arrastra las piezas para moverlas o haz clic en una pieza y luego en otra para moverlas."
+                    data-de="Klicken Sie auf die Teile und ziehen Sie sie, um sie zu bewegen, oder klicken Sie auf ein Teil und dann auf ein anderes, um sie zu bewegen."
+                    data-fr="Cliquez et faites glisser les pièces pour les déplacer ou cliquez sur une pièce puis cliquez sur une autre pour les déplacer."
+                    data-it="Fai clic e trascina i pezzi per muoverli o fai clic su un pezzo e poi su un altro per muoverli."
+                    data-jp="ピースをクリックしてドラッグして動かすか、1つのピースをクリックしてから別のピースをクリックして動かします。"
+                    data-hi="टुकड़ों को चलाने के लिए उन पर क्लिक करें और खींचें या एक टुकड़े पर क्लिक करें और फिर दूसरे पर क्लिक करें।"
+                    data-ar="انقر واسحب القطع لتحريكها أو انقر على قطعة ثم انقر على أخرى لتحريكها."
+                    data-la="Clicca et trahere partes ut moverli aut clicca in una parte et deinde clicca in alia ut moverli.">
+                </div>
+            </div>
+        </div>
+        <BR>
+        <div class="row">
+            <div class="col">
+                <select class="form-control" id="musica-select">
+                    <option value="">👆 🔉 👆 🔊 👆</option>
+                </select>
+                <BR>
+                <button type="button" class="btn btn-primary" id="playButton">▶</button>
+                <button type="button" class="btn btn-danger" id="stopButton">◼</button>
+            </div>
+            <BR>
+            <div class="col">
+                <select class="form-control" id="imagem-select">
+                    <option value="">👆 🎨 👆 🎨 👆</option>
+                </select>
+                <BR>
+                <p id="versiculo"></p>
+            </div>
+        </div>
+        <BR>
+        <div class="row">
+            <div class="col">
+                <div id="reference"></div>
+            </div>
+            <BR>
+            <div class="col">
+                <div id="puzzle"></div>
+            </div>
+        </div>
+        <BR>
+ <p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="https://apostoladouniversal.github.io/game">Puzzle Game</a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://site.tecnologiacrista.com/">Tecnologia Cristã</a> is marked with <a href="https://creativecommons.org/publicdomain/zero/1.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC0 1.0 Universal<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1" alt=""><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/zero.svg?ref=chooser-v1" alt=""></a></p> 
+    </div>
+
+
+    <script>//style="display: block; margin: 0 auto;"  style="text-align: center;"
+        function changeLanguage() {
+            const lang = document.getElementById('language').value;
+            const instructions = document.getElementById('instructions');
+
+            instructions.innerText = instructions.getAttribute(`data-${lang}`);
+        }
+
+        function setDefaultLanguage() {
+            const browserLang = navigator.language || navigator.userLanguage; // Compatibilidade em navegadores
+            const lang = browserLang.split('-')[0]; // Pegar apenas o código do idioma
+            const validLanguages = ['pt', 'en', 'zh', 'ru', 'es', 'de', 'fr', 'it', 'jp', 'hi', 'ar', 'la'];
+
+            if (validLanguages.includes(lang)) {
+                document.getElementById('language').value = lang;
+            } else {
+                document.getElementById('language').value = 'pt'; // Idioma padrão caso o navegador não tenha uma opção válida
+            }
+
+            changeLanguage(); // Atualiza o texto baseado no idioma padrão
+        }
+
+        // Define o idioma padrão ao carregar a página
+        window.onload = setDefaultLanguage;
+
+
+        const imagens = [
+            "cc_OT-001_25.jpg",
+            "cc_OT-002_25.jpg",
+            "cc_OT-003_25.jpg",
+            "cc_OT-004_25.jpg",
+            "cc_OT-005_25.jpg",
+            "cc_OT-006_25.jpg",
+            "cc_OT-007_25.jpg",
+            "cc_OT-008_25.jpg",
+            "cc_OT-009_25.jpg",
+            "cc_OT-010_25.jpg",
+            "cc_OT-011_25.jpg",
+            "cc_OT-012_25.jpg",
+            "cc_OT-013_04.jpg",
+            "cc_OT-014_25.jpg",
+            "cc_OT-015_25.jpg",
+            "cc_OT-016_25.jpg",
+            "cc_OT-017_25.jpg",
+            "cc_OT-018_25.jpg",
+            "cc_OT-019_25.jpg",
+            "cc_OT-020_25.jpg",
+            "cc_OT-021_25.jpg",
+            "cc_OT-022_25.jpg",
+            "cc_OT-023_25.jpg",
+            "cc_OT-024_25.jpg",
+            "cc_OT-025_04.jpg",
+            "cc_OT-026_25.jpg",
+            "cc_OT-027_25.jpg",
+            "cc_OT-028_25.jpg",
+            "cc_OT-029_25.jpg",
+            "cc_OT-030_25.jpg",
+            "cc_OT-031_25.jpg",
+            "cc_OT-032_25.jpg",
+            "cc_OT-033_25.jpg",
+            "cc_OT-034_25.jpg",
+            "cc_OT-035_04.jpg",
+            "cc_OT-036_25.jpg",
+            "cc_OT-037_25.jpg",
+            "cc_OT-038_25.jpg",
+            "cc_OT-039_25.jpg",
+            "cc_OT-040_25.jpg",
+            "cc_OT-041_25.jpg",
+            "cc_OT-042_25.jpg",
+            "cc_OT-043_25.jpg",
+            "cc_OT-044_25.jpg",
+            "cc_OT-045_25.jpg",
+            "cc_OT-046_25.jpg",
+            "cc_OT-047_25.jpg",
+            "cc_OT-048_25.jpg",
+            "cc_OT-049_25.jpg",
+            "cc_OT-050_25.jpg",
+            "cc_OT-051_25.jpg",
+            "cc_OT-052_25.jpg",
+            "cc_OT-053_25.jpg",
+            "cc_OT-054_25.jpg",
+            "cc_OT-055_25.jpg",
+            "cc_OT-056_25.jpg",
+            "cc_OT-057_25.jpg",
+            "cc_OT-058_25.jpg",
+            "cc_OT-059_25.jpg",
+            "cc_OT-060_25.jpg",
+            "cc_OT-061_25.jpg",
+            "cc_OT-062_25.jpg",
+            "cc_OT-063_25.jpg",
+            "cc_OT-064_25.jpg",
+            "cc_OT-065_25.jpg",
+            "cc_OT-066_25.jpg",
+            "cc_OT-067_25.jpg",
+            "cc_OT-068_25.jpg",
+            "cc_OT-069_25.jpg",
+            "cc_OT-070_25.jpg",
+            "cc_OT-071_25.jpg",
+            "cc_OT-072_04.jpg",
+            "cc_OT-073_25.jpg",
+            "cc_OT-074_25.jpg",
+            "cc_OT-075_25.jpg",
+            "cc_OT-076_25.jpg",
+            "cc_OT-077_25.jpg",
+            "cc_OT-078_25.jpg",
+            "cc_OT-079_25.jpg",
+            "cc_OT-080_04.jpg",
+            "cc_OT-081_25.jpg",
+            "cc_OT-082_25.jpg",
+            "cc_OT-083_25.jpg",
+            "cc_OT-084_25.jpg",
+            "cc_OT-085_25.jpg",
+            "cc_OT-086_25.jpg",
+            "cc_OT-087_25.jpg",
+            "cc_OT-088_25.jpg",
+            "cc_OT-089_25.jpg",
+            "cc_OT-090_25.jpg",
+            "cc_OT-091_25.jpg",
+            "cc_OT-092_25.jpg",
+            "cc_OT-093_25.jpg",
+            "cc_OT-094_25.jpg",
+            "cc_OT-095_25.jpg",
+            "cc_OT-096_25.jpg",
+            "cc_OT-097_25.jpg",
+            "cc_OT-098_25.jpg",
+            "cc_OT-099_25.jpg",
+            "cc_OT-100_25.jpg",
+            "cc_OT-101_25.jpg",
+            "cc_OT-102_25.jpg",
+            "cc_OT-103_04.jpg",
+            "cc_OT-104_25.jpg",
+            "cc_OT-105_25.jpg",
+            "cc_OT-106_25.jpg",
+            "cc_OT-107_25.jpg",
+            "cc_OT-108_25.jpg",
+            "cc_OT-109_25.jpg",
+            "cc_OT-110_25.jpg",
+            "cc_OT-111_25.jpg",
+            "cc_OT-112_25.jpg",
+            "cc_OT-113_25.jpg",
+            "cc_OT-114_25.jpg",
+            "cc_OT-115_25.jpg",
+            "cc_OT-116_25.jpg",
+            "cc_OT-117_25.jpg",
+            "cc_OT-118_25.jpg",
+            "cc_OT-119_25.jpg",
+            "cc_OT-120_04.jpg",
+            "cc_OT-121_25.jpg",
+            "cc_OT-122_25.jpg",
+            "cc_OT-123_25.jpg",
+            "cc_OT-124_25.jpg",
+            "cc_OT-125_25.jpg",
+            "cc_OT-126_25.jpg",
+            "cc_OT-127_25.jpg",
+            "cc_OT-128_25.jpg",
+            "cc_OT-129_25.jpg",
+            "cc_OT-130_25.jpg",
+            "cc_OT-131_25.jpg",
+            "cc_OT-132_25.jpg",
+            "cc_OT-133_25.jpg",
+            "cc_OT-134_25.jpg",
+            "cc_OT-135_25.jpg",
+            "cc_OT-136_25.jpg",
+            "cc_OT-137_25.jpg",
+            "cc_OT-138_25.jpg",
+            "cc_OT-139_25.jpg",
+            "cc_OT-140_25.jpg",
+            "cc_OT-141_25.jpg",
+            "cc_OT-142_25.jpg",
+            "cc_OT-143_25.jpg",
+            "cc_OT-144_25.jpg",
+            "cc_OT-145_04.jpg",
+            "cc_OT-146_25.jpg",
+            "cc_OT-147_25.jpg",
+            "cc_OT-148_25.jpg",
+            "cc_OT-149_25.jpg",
+            "cc_OT-150_25.jpg",
+            "cc_OT-151_25.jpg",
+            "cc_OT-152_25.jpg",
+            "cc_OT-153_25.jpg",
+            "cc_OT-154_04.jpg",
+            "cc_OT-155_25.jpg",
+            "cc_OT-156_04.jpg",
+            "cc_OT-157_25.jpg",
+            "cc_OT-158_25.jpg",
+            "cc_OT-159_25.jpg",
+            "cc_OT-160_25.jpg",
+            "cc_NT-161_01.jpg",
+            "cc_NT-162_04.jpg",
+            "cc_NT-163_04.jpg",
+            "cc_NT-164_04.jpg",
+            "cc_NT-165_45.jpg",
+            "cc_NT-166_45.jpg",
+            "cc_NT-167_25.jpg",
+            "cc_NT-168_25.jpg",
+            "cc_NT-169_04.jpg",
+            "cc_NT-170_45.jpg",
+            "cc_NT-171_25.jpg",
+            "cc_NT-172_04.jpg",
+            "cc_NT-173_45.jpg",
+            "cc_NT-174_45.jpg",
+            "cc_NT-175_25.jpg",
+            "cc_NT-176_04.jpg",
+            "cc_NT-177_25.jpg",
+            "cc_NT-178_25.jpg",
+            "cc_NT-179_25.jpg",
+            "cc_NT-180_45.jpg",
+            "cc_NT-181_25.jpg",
+            "cc_NT-182_45.jpg",
+            "cc_NT-183_25.jpg",
+            "cc_NT-184_45.jpg",
+            "cc_NT-185_25.jpg",
+            "cc_NT-186_45.jpg",
+            "cc_NT-187_45.jpg",
+            "cc_NT-188_25.jpg",
+            "cc_NT-189_25.jpg",
+            "cc_NT-190_25.jpg",
+            "cc_NT-191_25.jpg",
+            "cc_NT-192_45.jpg",
+            "cc_NT-193_25.jpg",
+            "cc_NT-194_25.jpg",
+            "cc_NT-195_25.jpg",
+            "cc_NT-196_04.jpg",
+            "cc_NT-197_25.jpg",
+            "cc_NT-198_45.jpg",
+            "cc_NT-199_45.jpg",
+            "cc_NT-200_25.jpg",
+            "cc_NT-201_45.jpg",
+            "cc_NT-202_45.jpg",
+            "cc_NT-203_25.jpg",
+            "cc_NT-204_25.jpg",
+            "cc_NT-205_25.jpg",
+            "cc_NT-206_25.jpg",
+            "cc_NT-207_25.jpg",
+            "cc_NT-208_25.jpg",
+            "cc_NT-209_25.jpg",
+            "cc_NT-210_45.jpg",
+            "cc_NT-211_25.jpg",
+            "cc_NT-212_25.jpg",
+            "cc_NT-213_45.jpg",
+            "cc_NT-214_25.jpg",
+            "cc_NT-215_25.jpg",
+            "cc_NT-216_04.jpg",
+            "cc_NT-217_45.jpg",
+            "cc_NT-218_04.jpg",
+            "cc_NT-219_45.jpg",
+            "cc_NT-220_04.jpg",
+            "cc_NT-221_04.jpg",
+            "cc_NT-222_45.jpg",
+            "cc_NT-223_04.jpg",
+            "cc_NT-224_25.jpg",
+            "cc_NT-225_04.jpg",
+            "cc_NT-226_45.jpg",
+            "cc_NT-227_25.jpg",
+            "cc_NT-228_45.jpg",
+            "cc_NT-229_04.jpg",
+            "cc_NT-230_45.jpg",
+            "cc_NT-231_45.jpg",
+            "cc_NT-232_45.jpg",
+            "cc_NT-233_45.jpg",
+            "cc_NT-234_25.jpg",
+            "cc_NT-235_25.jpg",
+            "cc_NT-236_25.jpg",
+            "cc_NT-237_04.jpg",
+            "cc_NT-238_01.jpg",
+            "cc_NT-239_04.jpg",
+            "cc_NT-240_01.jpg",
+            "cc_NT-241_01.jpg",
+        ]
+
+        const citations = [
+            "Genesis 1:3",
+            "Genesis 2:21-22",
+            "Genesis 3:24",
+            "Genesis 4:3-5",
+            "Genesis 4:8-9",
+            "Genesis 7:24",
+            "Genesis 8:3-4",
+            "Genesis 8:11",
+            "Genesis 9:24-25",
+            "Genesis 11:6-8",
+            "Genesis 12:1",
+            "Genesis 18:9-10",
+            "Genesis 19:24-26",
+            "Genesis 21:14",
+            "Genesis 21:17-18",
+            "Genesis 22:10-12",
+            "Genesis 23:19",
+            "Genesis 24:16",
+            "Genesis 24:65-67",
+            "Genesis 27:29",
+            "Genesis 28:12",
+            "Genesis 29:1-20",
+            "Genesis 32:11",
+            "Genesis 32:24",
+            "Genesis 33:3-4",
+            "Genesis 37:28",
+            "Genesis 41:25-26",
+            "Genesis 45:1",
+            "Genesis 46:5",
+            "Exodus 2:3",
+            "Exodus 2:6",
+            "Exodus 7:10",
+            "Exodus 9:2-3",
+            "Exodus 10:22",
+            "Exodus 12:29-30",
+            "Exodus 12:31",
+            "Exodus 14:27",
+            "Exodus 17:6",
+            "Exodus 19:18",
+            "Exodus 32:15",
+            "Exodus 32:19",
+            "Numbers 13:27",
+            "Numbers 16:32",
+            "Numbers 21:9",
+            "Numbers 22:23",
+            "Joshua 3:17",
+            "Joshua 5:9-15",
+            "Joshua 6:20",
+            "Joshua 6:25",
+            "Joshua 7:25",
+            "Joshua 8:20",
+            "Joshua 10:11",
+            "Joshua 10:13",
+            "Judges 4:21",
+            "Judges 5:7-9",
+            "Judges 7:7",
+            "Judges 7:22-23",
+            "Judges 9:5",
+            "Judges 9:52-53",
+            "Judges 11:34",
+            "Judges 11:40",
+            "Judges 14:5-6",
+            "Judges 15:15",
+            "Judges 16:3",
+            "Judges 16:17",
+            "Judges 16:30",
+            "Judges 19:25-27",
+            "Judges 19:30",
+            "Judges 21:12",
+            "Ruth 1:16",
+            "Ruth 2:22-23",
+            "1 Samuel 6:13",
+            "1 Samuel 9:21",
+            "1 Samuel 15:33",
+            "1 Samuel 17:50",
+            "1 Samuel 18:11-12",
+            "1 Samuel 19:11-12",
+            "1 Samuel 20:42",
+            "1 Samuel 24:10",
+            "1 Samuel 28:7",
+            "1 Samuel 31:5-6",
+            "2 Samuel 2:15-17",
+            "2 Samuel 12:31",
+            "2 Samuel 18:9",
+            "2 Samuel 18:33",
+            "2 Samuel 21:9-10",
+            "2 Samuel 21:17",
+            "1 Kings 3:25-27",
+            "1 Kings 5:5-6",
+            "1 Kings 13:24-25",
+            "1 Kings 17:22-23",
+            "1 Kings 18:38-40",
+            "1 Kings 19:5-6",
+            "1 Kings 20:29",
+            "1 Kings 22:35",
+            "2 Kings 1:10",
+            "2 Kings 2:11",
+            "2 Kings 2:23-24",
+            "2 Kings 6:25-26",
+            "2 Kings 9:33",
+            "2 Kings 9:34-35",
+            "2 Kings 17:25",
+            "2 Kings 19:35",
+            "2 Kings 25:7",
+            "1 Chronicles 10:12",
+            "1 Chronicles 21:16",
+            "2 Chronicles 1:10",
+            "2 Chronicles 9:1-2",
+            "2 Chronicles 20:22-23",
+            "2 Chronicles 23:13-15",
+            "Ezra 1:7-8",
+            "Ezra 3:11",
+            "Ezra 7:13",
+            "Ezra 9:6",
+            "Nehemiah 2:13",
+            "Nehemiah 8:5-6",
+            "Esther 1:11-12",
+            "Esther 6:11",
+            "Esther 7:5-6",
+            "Job 1:20-22",
+            "Job 2:11-13",
+            "Isaiah 6:8-9",
+            "Isaiah 13:20-21",
+            "Isaiah 27:1",
+            "Jeremiah 1:14-15",
+            "Jeremiah 36:4",
+            "Lamentations 1:8",
+            "Ezekiel 1:3",
+            "Ezekiel 37:4-5",
+            "Daniel 2:20-21",
+            "Daniel 3:28/3:95",
+            "Daniel 5:5-6",
+            "Daniel 6:20-21/6:21-22",
+            "Daniel 7:2-3",
+            "Amos 1:1",
+            "Jonah 2:1,10/2:2, 11",
+            "Jonah 3:4-5",
+            "Micah 6:7-8",
+            "Zechariah 6:1",
+            "Tobit 6:4",
+            "Tobit 12:15, 20",
+            "Judith 13:8",
+            "Judith 13:14",
+            "Esther 15:6-7",
+            "I Maccabees 2:23-24",
+            "I Maccabees 2:50",
+            "I Maccabees 5:42",
+            "I Maccabees 6:43, 46",
+            "I Maccabees 10:84",
+            "II Maccabees 3:25-27",
+            "II Maccabees 5:2",
+            "II Maccabees 6:30",
+            "II Maccabees 7:29",
+            "II Maccabees 9:7, 9",
+            "II Maccabees 11:8",
+            "II Maccabees 15:21",
+            "Baruch 3:14",
+            "The History of Susanna 21",
+            "The History of Susanna 61-62",
+            "Bel and the Dragon",
+            "Matthew 2:1-2",
+            "Matthew 2:13-14",
+            "Matthew 2:16",
+            "Matthew 5:7-10",
+            "Matthew 12:22-25",
+            "Matthew 13:54",
+            "Matthew 14:8-10",
+            "Matthew 14:19",
+            "Matthew 15:31",
+            "Matthew 17:2-3",
+            "Matthew 17:14-15",
+            "Matthew 21:7-8",
+            "Matthew 22:20-21",
+            "Matthew 26:40-41",
+            "Matthew 27:26",
+            "Matthew 27:29-30",
+            "Matthew 27:33-34",
+            "Matthew 27:35",
+            "Matthew 27:57-58",
+            "Matthew 27:59",
+            "Matthew 27:60-61",
+            "Matthew 28:5-6",
+            "Mark 1:6-7",
+            "Mark 1:9-11",
+            "Mark 2:23-25",
+            "Mark 4:37-38",
+            "Mark 10:13-14",
+            "Mark 12:42-43",
+            "Mark 14:22-24",
+            "Mark 14:45-46",
+            "Mark 15:21",
+            "Mark 16:19",
+            "Luke 1:26-28",
+            "Luke 2:15-16",
+            "Luke 2:46-47",
+            "Luke 4:7-8",
+            "Luke 4:36-37",
+            "Luke 5:3",
+            "Luke 8:2",
+            "Luke 8:52-54",
+            "Luke 10:33",
+            "Luke 10:34-35",
+            "Luke 10:41-42",
+            "Luke 12:29-31",
+            "Luke 15:17",
+            "Luke 15:20-21",
+            "Luke 16:20-21",
+            "Luke 18:11-13",
+            "Luke 22:43-44",
+            "Luke 23:34-35",
+            "Luke 23:44-45",
+            "Luke 24:26-27",
+            "John 2:5-7",
+            "John 2:15",
+            "John 4:13-14",
+            "John 6:19-20",
+            "John 8:3-5",
+            "John 11:41-43",
+            "John 18:26-27",
+            "John 19:2-3",
+            "John 19:15",
+            "John 19:18-19",
+            "John 21:10-11",
+            "Acts 2:2-3",
+            "Acts 2:32-33",
+            "Acts 3:6-7",
+            "Acts 5:4-5",
+            "Acts 7:59-60",
+            "Acts 9:3-5",
+            "Acts 10:28",
+            "Acts 12:7-8",
+            "Acts 19:19",
+            "Acts 21:34-35",
+            "Acts 27:43-44",
+            "1 Thessalonians 2:11-12",
+            "Revelation 1:9",
+            "Revelation 6:7-8",
+            "Revelation 12:1-3",
+            "Revelation 18:2",
+            "Revelation 20:12",
+            "Revelation 21:1-2"
+        ]
+
+        const musicas = [
+            "ave_maria_00210.ogg",
+            "ave_maria_01637.ogg",
+            "ave_maria_02844.ogg",
+            "ave_maria_03435.ogg",
+            "ave_maria_04627.ogg",
+            "ave_maria_09016.ogg",
+            "ave_maria_09779.ogg",
+            "ave_maria_10926.ogg",
+            "ave_maria_12056.ogg",
+            "ave_maria_12596.ogg",
+            "ave_maria_15209.ogg",
+            "ave_maria_17677.ogg",
+            "credo_00344.ogg",
+            "credo_02983.ogg",
+            "credo_07917.ogg",
+            "credo_08783.ogg",
+            "credo_19137.ogg",
+            "pater_noster_03326.ogg",
+            "pater_noster_07509.ogg",
+            "pater_noster_15303.ogg",
+            "salve_regina_00717.ogg",
+            "salve_regina_03165.ogg",
+            "salve_regina_04577.ogg",
+            "salve_regina_18654.ogg"
+        ]
+
+        const selectElement = document.getElementById('imagem-select');
+
+        // Populando o menu dropdown com as opções de imagens
+        imagens.forEach(imagem => {
+            const option = document.createElement('option');
+            option.value = imagem;
+            option.textContent = imagem;
+            selectElement.appendChild(option);
+        });
+
+        // Função para lidar com a seleção do dropdown
+        selectElement.addEventListener('change', () => {
+            const selectedImage = selectElement.value;
+            if (selectedImage) {
+                changeBackgroundImageForMe(selectedImage)
+            }
+        });
+
+        let globalaudio = new Audio();
+        globalaudio.volume = 0.5; // Set volume to 50%
+
+
+        // Função para tocar o áudio
+        document.getElementById('playButton').onclick = function () {
+            globalaudio.pause();
+            const selectedMusic = selectElement2.value;
+            if (selectedMusic) {
+                globalaudio = new Audio(selectedMusic)
+            }
+            globalaudio.play();
+        };
+
+        // Função para parar o áudio
+        document.getElementById('stopButton').onclick = function () {
+            globalaudio.pause();
+            globalaudio.currentTime = 0; // Opcional: reiniciar o áudio
+        };
+        const selectElement2 = document.getElementById('musica-select');
+
+        // Função para lidar com a seleção do dropdown
+        selectElement2.addEventListener('change', () => {
+            globalaudio.pause();
+            const selectedMusic = selectElement2.value;
+            if (selectedMusic) {
+                globalaudio = new Audio(selectedMusic)
+            }
+            globalaudio.play();
+        });
+
+        // Populando o menu dropdown com as opções de musicas
+        musicas.forEach(musica => {
+            const option = document.createElement('option');
+            option.value = `/game/sounds/${musica}`;
+            option.textContent = musica;
+            selectElement2.appendChild(option);
+        });
+
+        let selectedPiece = null; // Variável para armazenar a peça selecionada
+
+        const versiculoElement = document.getElementById('versiculo');
+
+        const puzzle = document.getElementById('puzzle'); // Seleciona o contêiner do quebra-cabeça
+        let pieces = []; // Array para armazenar as peças
+        const rows = 4; // Número de linhas
+        const cols = 4; // Número de colunas
+        let draggedPiece = null; // Variável para armazenar a peça sendo arrastada
+
+        function createPuzzle() {
+            // Verifica se já existem peças e as remove
+            if (pieces.length > 0) {
+                pieces.forEach(piece => {
+                    puzzle.removeChild(piece);
+                });
+                pieces = []; // Limpa o array de peças
+            }
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const piece = document.createElement('div'); // Cria um novo elemento div para a peça
+                    piece.classList.add('piece'); // Adiciona a classe 'piece' à peça
+                    piece.style.backgroundPosition = `-${col * 100}px -${row * 100}px`; // Define a posição de fundo da peça
+                    piece.dataset.position = `${row}-${col}`; // Armazena a posição da peça
+                    piece.setAttribute('draggable', true); // Define a peça como arrastável
+                    piece.addEventListener('dragstart', () => {
+                        draggedPiece = piece; // Armazena a peça que está sendo arrastada
+                    });
+                    piece.addEventListener('dragover', (e) => {
+                        e.preventDefault(); // Permite que a peça seja solta
+                    });
+                    piece.addEventListener('drop', () => {
+                        if (draggedPiece) {
+                            swapPieces(draggedPiece, piece); // Troca as peças ao soltar
+                            draggedPiece = null; // Reseta a peça arrastada
+                        }
+                    });
+                    pieces.push(piece); // Adiciona a peça ao array de peças
+                    puzzle.appendChild(piece); // Adiciona a peça ao contêiner do quebra-cabeça
+                }
+            }
+            shufflePieces(); // Chama a função para embaralhar as peças
+            document.querySelectorAll('.piece').forEach(piece => {
+                piece.addEventListener('click', () => {
+                    if (!selectedPiece) {
+                        // Se não há peça selecionada, seleciona a peça atual
+                        selectedPiece = piece;
+                        piece.classList.add('selected'); // Adiciona a borda à peça selecionada
+                        //console.log('selected',piece)
+                    } else {
+                        // Se já houver uma peça selecionada
+                        swapPieces(selectedPiece, piece);  // Troca as peças
+                        selectedPiece.classList.remove('selected'); // Remove a borda da primeira peça
+                        piece.classList.remove('selected'); // Remove a borda da primeira peça
+                        selectedPiece = null; // Reseta a peça selecionada
+                        //console.log('selected swap',selectedPiece,piece)
+                    }
+                });
+            });
+        }
+
+        function shufflePieces() {
+            for (let i = pieces.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1)); // Gera um índice aleatório
+                swapPieces(pieces[i], pieces[j]); // Troca as peças
+            }
+        }
+
+        function checkIfPuzzleIsSolved() {
+            // Gerar a lista de posições corretas no formato ['0-0', '0-1', ..., '3-3']
+            const correctPositions = [];
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    correctPositions.push(`${row}-${col}`);
+                }
+            }
+            // Gerar a lista de posições atuais das peças
+            const currentPositions = pieces.map(piece => piece.dataset.position);
+            // Comparar as listas
+            const isSolved = JSON.stringify(correctPositions) === JSON.stringify(currentPositions);
+
+            return isSolved;
+        }
+
+
+        function swapPieces(piece1, piece2) {
+            const tempPosition = piece1.dataset.position; // Armazena a posição da primeira peça
+            piece1.dataset.position = piece2.dataset.position; // Troca a posição da primeira peça com a segunda
+            piece2.dataset.position = tempPosition; // Atualiza a posição da segunda peça
+
+            const tempBackgroundPosition = piece1.style.backgroundPosition; // Armazena a posição de fundo da primeira peça
+            piece1.style.backgroundPosition = piece2.style.backgroundPosition; // Troca a posição de fundo
+            piece2.style.backgroundPosition = tempBackgroundPosition; // Atualiza a posição de fundo da segunda peça
+            //console.log(checkIfPuzzleIsSolved())
+            if (checkIfPuzzleIsSolved()) {
+                changeBackgroundImageForMe();
+                console.log('PARABENS')
+                globalaudio.pause();
+                globalaudio.currentTime = 0; // Opcional: reiniciar o áudio
+                globalaudio = new Audio('/game/sounds/victory.mp3');
+                globalaudio.play();
+            }
+
+        }
+
+
+
+
+        //createPuzzle(); // Chama a função para criar o quebra-cabeça
+
+        // New function to retrieve image content by src
+        function getImageContent(src) {
+            return new Promise((resolve, reject) => {
+                const image = new Image();
+                image.crossOrigin = "Anonymous"; // Handle cross-origin issues
+                image.onload = function () {
+                    resolve(image); // Return the loaded image
+                };
+                image.onerror = function () {
+                    reject(new Error('Failed to load image'));
+                };
+                image.src = src; // Start loading the image
+            });
+        }
+
+        function cropImage(image) {
+            const canvas = document.createElement('canvas'); // Create a canvas element dynamically
+            const ctx = canvas.getContext('2d');
+            const targetSize = 2000;
+
+            // Install the canvas size for cropping
+            canvas.width = targetSize;
+            canvas.height = targetSize;
+
+            // Center the image and draw it onto the canvas aligned to the right
+            const offsetX = image.width - targetSize;
+            const offsetY = (image.height - targetSize) / 2;
+            ctx.drawImage(image, -offsetX, -offsetY, image.width, image.height);
+
+            const croppedImageData = canvas.toDataURL(); // Returns the cropped image in base64 format
+            //return croppedImageData; // Resize the cropped image
+            return resizeImage(croppedImageData, 1000, 1000); // Resize the cropped image
+        }
+
+        function resizeImage(imageData, width, height) {
+            return new Promise((resolve) => {
+                const finalCanvas = document.createElement('canvas');
+                finalCanvas.width = width;
+                finalCanvas.height = height;
+                const finalCtx = finalCanvas.getContext('2d');
+                const img = new Image();
+
+                img.onload = function () {
+                    finalCtx.drawImage(img, 0, 0, width, height); // Draw resized image
+                    resolve(finalCanvas.toDataURL()); // Return the resized image in base64 format
+                };
+
+                img.src = imageData; // Load the cropped image
+            });
+        }
+        function changeBackgroundImage(newImageUrl) {
+            getImageContent(newImageUrl)
+                .then(cropImage)
+                .then(resizedImage => {
+                    const referenceImage = document.getElementById('reference');
+                    referenceImage.style.setProperty('background-image', `url('${resizedImage}')`);
+                    const puzzlePieces = document.querySelectorAll('.piece');
+                    puzzlePieces.forEach(piece => {
+                        piece.style.setProperty('background-image', `url('${resizedImage}')`);
+                    });
+                })
+                .catch(error => console.error('Error processing image:', error));
+        }
+
+        function selecionarOpcao(valor) {
+            const selectElement = document.getElementById('imagem-select');
+            // Verifica se o elemento select foi encontrado
+            if (!selectElement) {
+                //console.error(`Elemento com ID '${seletor}' não encontrado.`);
+                return;
+            }
+            // Verifica se o valor existe nas opções
+            const optionToSelect = Array.from(selectElement.options).find(option => option.value === valor);
+            if (optionToSelect) {
+                // Se encontrado, define como selecionado
+                selectElement.value = valor; // Alternativa: optionToSelect.selected = true;
+            }
+        }
+
+
+
+        function changeBackgroundImageForMe(custom) {
+            let imagemAleatoria;
+            if (!custom) {
+                // Se custom estiver vazio, seleciona uma imagem aleatória
+                let indiceAleatorio = Math.floor(Math.random() * imagens.length);
+                imagemAleatoria = imagens[indiceAleatorio];
+            } else {
+                // Caso contrário, usa o nome do custom
+                imagemAleatoria = custom;
+            }
+            /*const start = Date.now();
+            const delayInMs = 4000;
+            while (Date.now() - start < delayInMs) {
+                // NOP (não faz nada)
+            }*/
+            changeBackgroundImage(`/game/images/${imagemAleatoria}`);
+            shufflePieces()
+            selecionarOpcao(`${imagemAleatoria}`)
+            const index = imagens.indexOf(selectElement.value);
+            if (index !== -1) {
+                versiculoElement.textContent = citations[index];
+            }
+        }
+        //changeBackgroundImage('1000x1000.png');
+        changeBackgroundImageForMe()
+        createPuzzle(); // Chama a função para criar o quebra-cabeça
+    </script>
+</body>
+
+</html>
